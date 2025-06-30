@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -24,4 +25,6 @@ public class Loan {
     @Column(nullable = false)
     private LocalDate loanDate;
     private LocalDate returnDate;
+    private LocalDate dueDate;
+    private BigDecimal fineAmount;
 }

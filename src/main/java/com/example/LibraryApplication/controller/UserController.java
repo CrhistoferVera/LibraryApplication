@@ -3,6 +3,7 @@ package com.example.LibraryApplication.controller;
 import com.example.LibraryApplication.dto.CreateUserDTO;
 import com.example.LibraryApplication.dto.UserDTO;
 import com.example.LibraryApplication.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody CreateUserDTO dto){
+    public ResponseEntity<UserDTO> createUser(@RequestBody @Valid CreateUserDTO dto){
         UserDTO user = userService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }

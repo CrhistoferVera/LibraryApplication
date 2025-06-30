@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 @Data
 @NoArgsConstructor
@@ -15,4 +16,6 @@ public class LoanDTO {
     private BookDTO book;
     private LocalDate loanDate;
     private LocalDate returnDate;
+    private LocalDate dueDate;
+    private BigDecimal fineAmount;
 }

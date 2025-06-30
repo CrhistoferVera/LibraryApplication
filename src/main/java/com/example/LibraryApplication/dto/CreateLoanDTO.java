@@ -15,4 +15,7 @@ public class CreateLoanDTO {
 
     @Positive
     private Long bookId;
+
+    @Positive
+    private Long days;
 }

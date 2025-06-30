@@ -15,7 +15,9 @@ import com.example.LibraryApplication.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class LoanServiceImpl implements LoanService{
         loan.setBook(book);
         loan.setUser(user);
         loan.setLoanDate(LocalDate.now());
+        loan.setDueDate(LocalDate.now().plusDays(dto.getDays()));
         return loanMapper.toDTO(loanRepository.save(loan));
     }
 
@@ -53,6 +56,11 @@ public class LoanServiceImpl implements LoanService{
             throw new LoanAlreadyReturnedException("The loan with ID: "+loanId+" is already returned");
         }
         loan.setReturnDate(LocalDate.now());
+        if(loan.getReturnDate().isAfter(loan.getDueDate())){
+            long daysLate= ChronoUnit.DAYS.between(loan.getDueDate(),loan.getReturnDate());
+            BigDecimal amount = BigDecimal.valueOf(daysLate).multiply( new BigDecimal("5.00"));
+            loan.setFineAmount(amount);
+        }
         Book book= loan.getBook();
         book.setAvailable(true);
         bookRepository.save(book);
