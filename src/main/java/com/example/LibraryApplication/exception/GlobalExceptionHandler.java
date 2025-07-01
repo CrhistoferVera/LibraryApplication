@@ -56,4 +56,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 
+    @ExceptionHandler(BlockedUserException.class)
+    public ResponseEntity<ApiError> handleBlockedUsers(BlockedUserException ex){
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+
+    }
+
 }

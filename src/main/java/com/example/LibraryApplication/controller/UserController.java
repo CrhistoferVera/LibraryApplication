@@ -36,4 +36,9 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> findAll(){
         return ResponseEntity.ok(userService.findAll());
     }
+
+    @PutMapping("/unlock/{id}")
+    public ResponseEntity<UserDTO> unlockUser(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(userService.unlockUser(id));
+    }
 }

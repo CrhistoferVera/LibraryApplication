@@ -25,6 +25,7 @@ public class Loan {
     @Column(nullable = false)
     private LocalDate loanDate;
     private LocalDate returnDate;
+    private boolean returned= false;
     private LocalDate dueDate;
     private BigDecimal fineAmount;
 }

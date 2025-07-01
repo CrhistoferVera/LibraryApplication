@@ -2,6 +2,7 @@ package com.example.LibraryApplication.service;
 
 import com.example.LibraryApplication.dto.CreateLoanDTO;
 import com.example.LibraryApplication.dto.LoanDTO;
+import com.example.LibraryApplication.exception.BlockedUserException;
 import com.example.LibraryApplication.exception.IllegalStateException;
 import com.example.LibraryApplication.exception.LoanAlreadyReturnedException;
 import com.example.LibraryApplication.exception.ResourceNotFoundException;
@@ -33,6 +34,23 @@ public class LoanServiceImpl implements LoanService{
         Long bookId = dto.getBookId();
         User user   = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: "+userId));
+        if(user.isBlockedUser()){
+            throw new BlockedUserException("The user with ID: "+ userId+ " is blocked.");
+        }
+        List<Loan> loansFromUser = loanRepository.findLoansNotReturnedByUser(user.getId());
+        long loansAmount = loansFromUser.size();
+        if(loansAmount > 3){
+            user.setBlockedUser(true);
+            userRepository.save(user);
+            throw new BlockedUserException("The user with ID: "+ userId+ " has more than 3 loans.");
+        }
+        boolean hasOverDue = loansFromUser.stream().anyMatch(loan ->
+                LocalDate.now().isAfter(loan.getDueDate()));
+        if(hasOverDue){
+            user.setBlockedUser(true);
+            userRepository.save(user);
+            throw new BlockedUserException("The user with ID: "+ userId+ " has an overdue loan.");
+        }
         Book book   = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with ID: "+bookId));
         if(!book.isAvailable()) {
@@ -52,10 +70,11 @@ public class LoanServiceImpl implements LoanService{
     public LoanDTO returnBook(Long loanId) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ResourceNotFoundException("The loan with ID: "+loanId+" was not found"));
-        if(loan.getReturnDate() != null){
+        if(loan.isReturned()){
             throw new LoanAlreadyReturnedException("The loan with ID: "+loanId+" is already returned");
         }
         loan.setReturnDate(LocalDate.now());
+        loan.setReturned(true);
         if(loan.getReturnDate().isAfter(loan.getDueDate())){
             long daysLate= ChronoUnit.DAYS.between(loan.getDueDate(),loan.getReturnDate());
             BigDecimal amount = BigDecimal.valueOf(daysLate).multiply( new BigDecimal("5.00"));
@@ -64,7 +83,18 @@ public class LoanServiceImpl implements LoanService{
         Book book= loan.getBook();
         book.setAvailable(true);
         bookRepository.save(book);
-        return loanMapper.toDTO(loanRepository.save(loan));
+        loanRepository.save(loan);
+        User user = loan.getUser();
+        if(user.isBlockedUser()){
+            List<Loan> loansFromUser = loanRepository.findLoansNotReturnedByUser(user.getId());
+            boolean hasOverDue = loansFromUser.stream().anyMatch(loan1 ->
+                    LocalDate.now().isAfter(loan1.getDueDate()));
+            if(!hasOverDue){
+                user.setBlockedUser(false);
+                userRepository.save(user);
+            }
+        }
+        return loanMapper.toDTO(loan);
     }
 
     @Override

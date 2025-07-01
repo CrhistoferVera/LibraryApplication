@@ -16,6 +16,7 @@ public class LoanDTO {
     private BookDTO book;
     private LocalDate loanDate;
     private LocalDate returnDate;
+    private boolean returned= false;
     private LocalDate dueDate;
     private BigDecimal fineAmount;
 }

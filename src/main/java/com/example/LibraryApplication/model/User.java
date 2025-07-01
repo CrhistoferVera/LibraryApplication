@@ -22,4 +22,5 @@ public class User {
     private String email;
     @OneToMany(mappedBy = "user")
     private List<Loan> loans = new ArrayList<>();
+    private boolean blockedUser= false;
 }

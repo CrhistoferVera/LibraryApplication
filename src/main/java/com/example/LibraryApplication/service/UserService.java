@@ -13,5 +13,6 @@ public interface UserService {
     void delete(Long id);
     UserDTO findById(Long id);
     List<UserDTO>  findAll();
+    UserDTO unlockUser(Long id);
 
 }

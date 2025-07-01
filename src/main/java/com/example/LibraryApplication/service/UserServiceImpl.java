@@ -42,4 +42,12 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> findAll() {
         return userMapper.toDTOs(userRepository.findAll());
     }
+
+    @Override
+    public UserDTO unlockUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with Id: "+ id));
+        user.setBlockedUser(false);
+        return userMapper.toDTO(userRepository.save(user));
+    }
 }
